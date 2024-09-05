@@ -1,0 +1,9 @@
+.response-display-container {
+  margin: 20px 0;
+}
+
+.response-text {
+  font-size: 18px;
+  color: #333;
+  font-weight: bold;
+}

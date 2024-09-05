@@ -1,0 +1,121 @@
+/* Container and window styling */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+  background-color: #f0f0f0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.chat-window {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth; /* Smooth scrolling */
+  background: linear-gradient(to bottom, #ffffff, #e8f5e9);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Message styling */
+.chat-message {
+  max-width: 60%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  word-wrap: break-word;
+  animation: slideIn 0.3s ease-out; /* Slide-in animation */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideIn {
+  from {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+.user-message {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+  border-radius: 15px 15px 0 15px; /* Rounded corners for user messages */
+}
+
+.bot-message {
+  background-color: #ffffff;
+  align-self: flex-start;
+  border-radius: 15px 15px 15px 0; /* Rounded corners for bot messages */
+}
+
+/* Image styling */
+.chat-image {
+  width: 200px; /* Fixed width */
+  height: 200px; /* Fixed height */
+  border-radius: 10px;
+  object-fit: cover;
+  transition: transform 0.3s ease; /* Zoom effect on hover */
+}
+
+.chat-image:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Shadow on hover */
+}
+
+/* Input container styling */
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+}
+
+.file-input {
+  margin-right: 10px;
+}
+
+.text-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  transition: all 0.3s ease; /* Smooth focus effect */
+}
+
+.text-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); /* Glow effect on focus */
+}
+
+/* Send button styling */
+.send-button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease; /* Smooth hover effect */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.send-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px); /* Lift the button slightly on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Add deeper shadow on hover */
+}
+
+.send-button:active {
+  transform: translateY(0); /* Reset position on click */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Subtle click effect */
+}

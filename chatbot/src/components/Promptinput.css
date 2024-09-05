@@ -1,0 +1,11 @@
+.prompt-input-container {
+  margin: 20px 0;
+}
+
+.prompt-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+}
