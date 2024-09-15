@@ -1,77 +1,133 @@
-import './App.css';
-import { useState } from 'react';
+// App.js
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App() {
-    const [image, setImage] = useState('');
-    const [prompt, setPrompt] = useState('');
-    const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [showChat, setShowChat] = useState(false);
+  const chatMessagesRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-    // Function to handle file input change
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64Image = reader.result;
-                setImage(base64Image); // Set base64 string as the image state
-                // Add the image to the messages array
-                setMessages((prevMessages) => [...prevMessages, { type: 'image', content: base64Image, sender: 'user' }]);
-            };
-            reader.readAsDataURL(file); // Convert the file to base64
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const addMessage = (content, isUser = false) => {
+    setMessages(prevMessages => [...prevMessages, { content, isUser }]);
+  };
+
+  const sendMessage = async (message = '', file = null) => {
+    if (message || file) {
+      if (!showChat) setShowChat(true);
+      addMessage(file || message, true);
+
+      let image = null;
+      if (file) {
+        image = await convertToBase64(file);
+      }
+
+      addMessage('Bot is typing...', false);
+
+      try {
+        const response = await axios.post('http://localhost:3000/send-to-flask', {
+          prompt: message,
+          image: image
+        });
+
+        setMessages(prevMessages => prevMessages.filter(msg => msg.content !== 'Bot is typing...'));
+
+        if (response.data && response.data.response) {
+          addMessage(response.data.response, false);
+        } else {
+          addMessage('Error: Unexpected response format from server', false);
         }
-    };
+      } catch (error) {
+        setMessages(prevMessages => prevMessages.filter(msg => msg.content !== 'Bot is typing...'));
+        addMessage('Error: ' + (error.response?.data || error.message), false);
+      }
+    }
+  };
 
-    const handleSubmit = async () => {
-        // Add the user's prompt to the messages array
-        setMessages((prevMessages) => [...prevMessages, { type: 'text', content: prompt, sender: 'user' }]);
-        try {
-            const result = await axios.post('http://localhost:3000/send-to-flask', {
-                image: image, // Base64 encoded image
-                prompt: prompt
-            });
-            // Add the response to the messages array
-            setMessages((prevMessages) => [...prevMessages, { type: 'text', content: result.data.response, sender: 'bot' }]);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-        setPrompt(''); // Clear the input after sending
-    };
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
 
-    return (
-        <div className="chat-container">
-            <div className="chat-window">
-                {messages.map((message, index) => (
-                    <div
-                        key={index}
-                        className={`chat-message ${message.sender === 'user' ? 'user-message' : 'bot-message'}`}
-                    >
-                        {message.type === 'text' ? (
-                            message.content
-                        ) : (
-                            <img src={message.content} alt="Sent" className="chat-image" />
-                        )}
-                    </div>
-                ))}
+  const handleSendClick = () => {
+    if (inputValue.trim()) {
+      sendMessage(inputValue);
+      setInputValue('');
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      sendMessage('', file);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSendClick();
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <div className="chatbot-title">AI Chatbot</div>
+
+      {!showChat && (
+        <div className="main-heading">Hello, how can I help you?</div>
+      )}
+
+      <div className={`chat-container ${showChat ? 'show' : ''}`}>
+        <div className="chat-messages" ref={chatMessagesRef}>
+          {messages.map((msg, index) => (
+            <div key={index} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
+              {msg.content instanceof File ? (
+                <img src={URL.createObjectURL(msg.content)} alt="User upload" />
+              ) : (
+                typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+              )}
             </div>
-            <div className="chat-input-container">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="file-input"
-                />
-                <input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="text-input"
-                />
-                <button onClick={handleSubmit} className="send-button">Send</button>
-            </div>
+          ))}
         </div>
-    );
+      </div>
+      
+      <div className="user-input-container">
+        <div className="user-input">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Type your message..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <button className="btn-upload" onClick={() => fileInputRef.current.click()}>
+            <i className="fas fa-upload"></i>
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <button className="btn-send" onClick={handleSendClick}>➤</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default App;
