@@ -5,6 +5,12 @@ import torch
 from PIL import Image
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor, AutoModelForSeq2SeqLM
 from ultralytics import YOLO
+from flask import Flask, jsonify
+from flask_cors import CORS, cross_origin
+
+app = Flask(__name__)
+CORS(app)
+
 
 app = Flask(__name__)
 
