@@ -114,66 +114,67 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <div className="content">
-        <div className="chatbot-title">AI Chatbot</div>
+    <>
+      <div className={`app-container ${showModal ? 'blur-background' : ''}`}>
+        <div className="content">
+          <div className="chatbot-title">AI Chatbot</div>
 
-        {!showChat ? (
-          <div className="initial-view">
-            <div className="main-heading">Hello, how can I help you?</div>
-            <div
-              className={`drop-zone ${isDragging ? 'dragging' : ''}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <p>Drag and drop an image here</p>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
-              <button onClick={() => fileInputRef.current.click()}>Or click to upload</button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="chat-container show">
-              <div className="chat-messages" ref={chatMessagesRef}>
-                {messages.map((msg, index) => (
-                  <div key={index} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
-                    {msg.content instanceof File ? (
-                      <img src={URL.createObjectURL(msg.content)} alt="User upload" />
-                    ) : (
-                      typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="user-input-container">
-              <div className="user-input">
+          {!showChat ? (
+            <div className="initial-view">
+              <div className="main-heading">Hello, how can I help you?</div>
+              <div
+                className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <p>Drag and drop an image here</p>
                 <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Type your message..."
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
                 />
-                <button className="btn-upload" onClick={toggleModal}>
-                  <i className="fas fa-upload"></i>
-                </button>
-                <button className="btn-send" onClick={handleSendClick}>➤</button>
+                <button onClick={() => fileInputRef.current.click()}>Or click to upload</button>
               </div>
             </div>
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <div className="chat-container show">
+                <div className="chat-messages" ref={chatMessagesRef}>
+                  {messages.map((msg, index) => (
+                    <div key={index} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
+                      {msg.content instanceof File ? (
+                        <img src={URL.createObjectURL(msg.content)} alt="User upload" />
+                      ) : (
+                        typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
+              <div className="user-input-container">
+                <div className="user-input">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Type your message..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                  />
+                  <button className="btn-upload" onClick={toggleModal}>
+                    <i className="fas fa-upload"></i>
+                  </button>
+                  <button className="btn-send" onClick={handleSendClick}>➤</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -197,7 +198,7 @@ function App() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
