@@ -69,6 +69,7 @@ body {
   max-width: 1200px;
   max-height: 800px;
   padding: 10px;
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .chat-container.show {
@@ -86,6 +87,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
@@ -94,6 +96,7 @@ body {
   align-items: center;
   height: 200px;
   width: 300px;
+  animation: scaleIn 0.3s ease-out;
 }
 
 .modal-content .drop-zone {
@@ -144,7 +147,7 @@ body {
   margin-bottom: 20px;
   padding: 12px 18px;
   border-radius: 20px;
-  animation: fadeInUp 0.3s ease;
+  animation: fadeInUp 0.3s ease-out;
 }
 
 .user-message {
@@ -184,6 +187,11 @@ body {
   background-color: transparent;
   padding: 10px;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.user-input:focus-within {
+  transform: scale(1.02);
 }
 
 .form-control {
@@ -217,6 +225,7 @@ body {
   justify-content: center;
   background-color: #007bff;
   color: white;
+  transition: all 0.3s ease;
 }
 
 .btn-upload {
@@ -237,6 +246,12 @@ body {
   padding: 5px;
 }
 
+.btn-upload:hover,
+.btn-send:hover {
+  transform: translateY(calc(-50% - 3px));
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
 .main-heading {
   font-size: 80px;
   font-weight: 500;
@@ -248,9 +263,12 @@ body {
   background-color: rgb(249, 247, 247);
   background-clip: text;
   -webkit-background-clip: text;
-  white-space: nowrap; /* Ensures text doesn't wrap */
   overflow: hidden;
-  animation: typing 2s steps(30, end), cursor-blink 0.75s step-end infinite;
+  border-right: 2px solid black;
+  white-space: nowrap;
+  animation: 
+    typing 2s steps(40, end),
+    cursor-blink 0.75s step-end infinite;
 }
 
 .chatbot-title {
@@ -316,6 +334,10 @@ body {
   background-color: #0056b3;
 }
 
+.drop-zone:hover{
+  transform: translateY(calc(-1% - 3px));
+}
+
 .modal-close {
   position: absolute;
   top: 5px;
@@ -341,8 +363,14 @@ body {
 
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 @keyframes typing {
@@ -351,10 +379,19 @@ body {
 }
 
 @keyframes cursor-blink {
-  from { border-color: transparent; }
-  to { border-color: black; }
+  from, to { border-color: transparent; }
+  50% { border-color: black; }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 
 @media (max-width: 768px) {
   .chat-container {
