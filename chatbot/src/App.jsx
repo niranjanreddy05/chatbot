@@ -1,4 +1,3 @@
-// App.js
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -7,6 +6,8 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const chatMessagesRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -22,7 +23,6 @@ function App() {
 
   const sendMessage = async (message = '', file = null) => {
     if (message || file) {
-      if (!showChat) setShowChat(true);
       addMessage(file || message, true);
 
       let image = null;
@@ -71,8 +71,14 @@ function App() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      sendMessage('', file);
+      handleFile(file);
     }
+  };
+
+  const handleFile = (file) => {
+    sendMessage('', file);
+    setShowChat(true);
+    setShowModal(false);
   };
 
   const handleKeyPress = (e) => {
@@ -81,51 +87,116 @@ function App() {
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="app-container">
-      <div className="chatbot-title">AI Chatbot</div>
+      <div className="content">
+        <div className="chatbot-title">AI Chatbot</div>
 
-      {!showChat && (
-        <div className="main-heading">Hello, how can I help you?</div>
-      )}
-
-      <div className={`chat-container ${showChat ? 'show' : ''}`}>
-        <div className="chat-messages" ref={chatMessagesRef}>
-          {messages.map((msg, index) => (
-            <div key={index} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
-              {msg.content instanceof File ? (
-                <img src={URL.createObjectURL(msg.content)} alt="User upload" />
-              ) : (
-                typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
-              )}
+        {!showChat ? (
+          <div className="initial-view">
+            <div className="main-heading">Hello, how can I help you?</div>
+            <div
+              className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <p>Drag and drop an image here</p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+              />
+              <button onClick={() => fileInputRef.current.click()}>Or click to upload</button>
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <>
+            <div className="chat-container show">
+              <div className="chat-messages" ref={chatMessagesRef}>
+                {messages.map((msg, index) => (
+                  <div key={index} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
+                    {msg.content instanceof File ? (
+                      <img src={URL.createObjectURL(msg.content)} alt="User upload" />
+                    ) : (
+                      typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="user-input-container">
+              <div className="user-input">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Type your message..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+                <button className="btn-upload" onClick={toggleModal}>
+                  <i className="fas fa-upload"></i>
+                </button>
+                <button className="btn-send" onClick={handleSendClick}>➤</button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      
-      <div className="user-input-container">
-        <div className="user-input">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Type your message..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          <button className="btn-upload" onClick={() => fileInputRef.current.click()}>
-            <i className="fas fa-upload"></i>
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          <button className="btn-send" onClick={handleSendClick}>➤</button>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div
+              className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <p>Drag and drop an image here</p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+              />
+              <button onClick={() => fileInputRef.current.click()}>Or click to upload</button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -10,7 +10,6 @@ html, body {
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-image: url('./3201272.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -27,6 +26,27 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-image: url('./3201272.jpg');
+  background-size: cover; /* Ensures the image covers the entire div */
+  background-position: center; /* Centers the image within the div */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+  background-attachment: fixed;
+  z-index: 0;
+  position: fixed;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.3s ease-in-out;
+}
+
+.blur-background {
+  filter: blur(5px);
 }
 
 .chat-container {
@@ -49,35 +69,64 @@ body {
   padding: 10px;
 }
 
-/* Webkit scrollbar styles */
-.chat-container::-webkit-scrollbar {
-  width: 12px; /* Width of the scrollbar */
-}
-
-.chat-container::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1); /* Track color */
-  border-radius: 10px; /* Rounded corners */
-}
-
-.chat-container::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3); /* Scrollbar thumb color */
-  border-radius: 10px; /* Rounded corners */
-}
-
-.chat-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5); /* Thumb color on hover */
-}
-
-/* Firefox scrollbar styles */
-.chat-container {
-  scrollbar-width: thin; /* Thin scrollbar */
-  scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.1); /* Thumb and track color */
-}
-
 .chat-container.show {
   display: flex;
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content .drop-zone {
+  width: 300px;
+  height: 200px;
+  border: 2px dashed #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  position: relative;
+  padding: 20px;
+}
+
+
+
+.modal-content .drop-zone p {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-content .drop-zone button:not(.modal-close) {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal-content .drop-zone button:not(.modal-close):hover {
+  background-color: #0056b3;
+}
 .chat-messages {
   flex-grow: 1;
   overflow-y: auto;
@@ -156,15 +205,14 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  border-radius: 50%; /* Makes the button round */
-  width: 40px; /* Adjust size as needed */
-  height: 40px; /* Adjust size as needed */
-  display: flex; /* Center content inside the button */
-  align-items: center; /* Center content vertically */
-  justify-content: center; /* Center content horizontally */
-  /* Optionally add a background color and/or box-shadow */
-  background-color: #007bff; /* Example background color */
-  color: white; /* Example text color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #007bff;
+  color: white;
 }
 
 .btn-upload {
@@ -190,10 +238,7 @@ body {
   font-weight: 500;
   color: rgb(250, 248, 248);
   text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  margin-bottom: 30px;
   text-shadow: 0 0 8px rgba(255, 255, 255, 1);
   z-index: 1;
   background-color: rgb(249, 247, 247);
@@ -216,6 +261,76 @@ body {
   -webkit-background-clip: text;
 }
 
+.initial-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.drop-zone {
+  width: 300px;
+  height: 200px;
+  border: 2px dashed #fff;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.drop-zone.dragging {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #007bff;
+}
+
+.drop-zone p {
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.drop-zone button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.drop-zone button:hover {
+  background-color: #0056b3;
+}
+
+.modal-close {
+  position: absolute;
+  top: 5px;
+  right: 0px;
+  width: 35px;
+  height: 3px;
+  background-color: transparent !important;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.modal-close:hover {
+  opacity: 1;
+}
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -233,5 +348,10 @@ body {
 
   .main-heading {
     font-size: 40px;
+  }
+
+  .drop-zone {
+    width: 250px;
+    height: 150px;
   }
 }
