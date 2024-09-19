@@ -17,8 +17,24 @@ function App() {
     }
   }, [messages]);
 
-  const addMessage = (content, isUser = false) => {
-    setMessages(prevMessages => [...prevMessages, { content, isUser }]);
+  useEffect(() => {
+    async function warmUp() {
+      try {
+        const response = await axios.get('http://localhost:3000/warmup');
+        console.log(response);
+      } catch (error) {
+        console.error("Error warming up:", error);
+      }
+    }
+  
+    warmUp();
+  }, []);
+
+  const addMessage = (content, isUser = false, isLoading = false) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { content, isUser, isLoading },
+    ]);
   };
 
   const sendMessage = async (message = '', file = null) => {
@@ -30,15 +46,17 @@ function App() {
         image = await convertToBase64(file);
       }
 
-      addMessage('Bot is typing...', false);
+      addMessage(null, false, true);
 
       try {
         const response = await axios.post('http://localhost:3000/send-to-flask', {
           prompt: message,
-          image: image
+          image: image,
         });
 
-        setMessages(prevMessages => prevMessages.filter(msg => msg.content !== 'Bot is typing...'));
+        setMessages((prevMessages) =>
+          prevMessages.filter((msg) => !msg.isLoading)
+        );
 
         if (response.data && response.data.response) {
           addMessage(response.data.response, false);
@@ -46,7 +64,9 @@ function App() {
           addMessage('Error: Unexpected response format from server', false);
         }
       } catch (error) {
-        setMessages(prevMessages => prevMessages.filter(msg => msg.content !== 'Bot is typing...'));
+        setMessages((prevMessages) =>
+          prevMessages.filter((msg) => !msg.isLoading)
+        );
         addMessage('Error: ' + (error.response?.data || error.message), false);
       }
     }
@@ -57,7 +77,7 @@ function App() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
@@ -116,8 +136,10 @@ function App() {
   return (
     <>
       <div className={`app-container ${showModal ? 'blur-background' : ''}`}>
-        <div className="content">
+          <div className="navbar">
           <div className="chatbot-title">AI Chatbot</div>
+          </div>
+          <div className="content">
 
           {!showChat ? (
             <div className="initial-view">
@@ -136,7 +158,9 @@ function App() {
                   style={{ display: 'none' }}
                   onChange={handleFileChange}
                 />
-                <button onClick={() => fileInputRef.current.click()}>Or click to upload</button>
+                <button onClick={() => fileInputRef.current.click()}>
+                  Or click to upload
+                </button>
               </div>
             </div>
           ) : (
@@ -144,11 +168,28 @@ function App() {
               <div className="chat-container show">
                 <div className="chat-messages" ref={chatMessagesRef}>
                   {messages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
-                      {msg.content instanceof File ? (
-                        <img src={URL.createObjectURL(msg.content)} alt="User upload" />
+                    <div
+                      key={index}
+                      className={`message ${
+                        msg.isUser ? 'user-message' : 'bot-message'
+                      }`}
+                    >
+                      {msg.isLoading ? (
+                        <div className="loading-dots">
+                          <div className="dot"></div>
+                          <div className="dot"></div>
+                          <div className="dot"></div>
+                        </div>
+                      ) : msg.content instanceof File ? (
+                        <img
+                          src={URL.createObjectURL(msg.content)}
+                          alt="User upload"
+                          className="uploaded-image"
+                        />
+                      ) : typeof msg.content === 'string' ? (
+                        msg.content
                       ) : (
-                        typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)
+                        JSON.stringify(msg.content)
                       )}
                     </div>
                   ))}
@@ -168,7 +209,9 @@ function App() {
                   <button className="btn-upload" onClick={toggleModal}>
                     <i className="fas fa-upload"></i>
                   </button>
-                  <button className="btn-send" onClick={handleSendClick}>➤</button>
+                  <button className="btn-send" onClick={handleSendClick}>
+                    ➤
+                  </button>
                 </div>
               </div>
             </>
@@ -184,7 +227,9 @@ function App() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <button className="modal-close" onClick={closeModal}>×</button>
+              <button className="modal-close" onClick={closeModal}>
+                ×
+              </button>
               <p>Drag and drop an image here</p>
               <input
                 type="file"
@@ -193,7 +238,9 @@ function App() {
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
               />
-              <button onClick={() => fileInputRef.current.click()}>Or click to upload</button>
+              <button onClick={() => fileInputRef.current.click()}>
+                Or click to upload
+              </button>
             </div>
           </div>
         </div>
