@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';
+import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
+import "./App.css";
 
 function App() {
   const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [showChat, setShowChat] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -20,13 +20,13 @@ function App() {
   useEffect(() => {
     async function warmUp() {
       try {
-        const response = await axios.get('http://localhost:3000/warmup');
+        const response = await axios.get("http://localhost:3000/warmup");
         console.log(response);
       } catch (error) {
         console.error("Error warming up:", error);
       }
     }
-  
+
     warmUp();
   }, []);
 
@@ -37,7 +37,7 @@ function App() {
     ]);
   };
 
-  const sendMessage = async (message = '', file = null) => {
+  const sendMessage = async (message = "", file = null) => {
     if (message || file) {
       addMessage(file || message, true);
 
@@ -49,10 +49,13 @@ function App() {
       addMessage(null, false, true);
 
       try {
-        const response = await axios.post('http://localhost:3000/send-to-flask', {
-          prompt: message,
-          image: image,
-        });
+        const response = await axios.post(
+          "http://localhost:3000/send-to-flask",
+          {
+            prompt: message,
+            image: image,
+          }
+        );
 
         setMessages((prevMessages) =>
           prevMessages.filter((msg) => !msg.isLoading)
@@ -61,13 +64,13 @@ function App() {
         if (response.data && response.data.response) {
           addMessage(response.data.response, false);
         } else {
-          addMessage('Error: Unexpected response format from server', false);
+          addMessage("Error: Unexpected response format from server", false);
         }
       } catch (error) {
         setMessages((prevMessages) =>
           prevMessages.filter((msg) => !msg.isLoading)
         );
-        addMessage('Error: ' + (error.response?.data || error.message), false);
+        addMessage("Error: " + (error.response?.data || error.message), false);
       }
     }
   };
@@ -84,7 +87,7 @@ function App() {
   const handleSendClick = () => {
     if (inputValue.trim()) {
       sendMessage(inputValue);
-      setInputValue('');
+      setInputValue("");
     }
   };
 
@@ -96,13 +99,13 @@ function App() {
   };
 
   const handleFile = (file) => {
-    sendMessage('', file);
+    sendMessage("", file);
     setShowChat(true);
     setShowModal(false);
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSendClick();
     }
   };
@@ -135,27 +138,26 @@ function App() {
 
   return (
     <>
-      <div className={`app-container ${showModal ? 'blur-background' : ''}`}>
-          <div className="navbar">
+      <div className={`app-container ${showModal ? "blur-background" : ""}`}>
+        <div className="navbar">
           <div className="chatbot-title">AI Chatbot</div>
-          </div>
-          <div className="content">
-
+        </div>
+        <div className="content">
           {!showChat ? (
             <div className="initial-view">
               <div className="main-heading">Hello, how can I help you?</div>
               <div
-                className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+                className={`drop-zone ${isDragging ? "dragging" : ""}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <p>Drag and drop an image here</p>
+                <p className="prompt">Drag and drop an image here</p>
                 <input
                   type="file"
                   ref={fileInputRef}
                   accept="image/*"
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                   onChange={handleFileChange}
                 />
                 <button onClick={() => fileInputRef.current.click()}>
@@ -171,7 +173,7 @@ function App() {
                     <div
                       key={index}
                       className={`message ${
-                        msg.isUser ? 'user-message' : 'bot-message'
+                        msg.isUser ? "user-message" : "bot-message"
                       }`}
                     >
                       {msg.isLoading ? (
@@ -186,7 +188,7 @@ function App() {
                           alt="User upload"
                           className="uploaded-image"
                         />
-                      ) : typeof msg.content === 'string' ? (
+                      ) : typeof msg.content === "string" ? (
                         msg.content
                       ) : (
                         JSON.stringify(msg.content)
@@ -222,7 +224,7 @@ function App() {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div
-              className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+              className={`drop-zone ${isDragging ? "dragging" : ""}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -235,7 +237,7 @@ function App() {
                 type="file"
                 ref={fileInputRef}
                 accept="image/*"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 onChange={handleFileChange}
               />
               <button onClick={() => fileInputRef.current.click()}>
